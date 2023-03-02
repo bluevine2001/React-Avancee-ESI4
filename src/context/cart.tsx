@@ -13,7 +13,11 @@ type Cart = {
   totalprice: number;
 };
 
-type CartReducer = React.Reducer<Cart, { type: string; action: any }>;
+type ReducerAction = {
+  type: string;
+  product?: { id?: number; nom?: string; prix?: number; quantity?: number };
+};
+type CartReducer = React.Reducer<Cart, ReducerAction>;
 //type CartReducer = (state: Cart, action: any) => Cart;
 
 const defaultCart: Cart = {
@@ -21,17 +25,20 @@ const defaultCart: Cart = {
   productTab: [],
   totalprice: 0,
 };
-const CartContext = createContext<any>({
+const CartContext = createContext<{
+  cart: Cart;
+  setCart: React.Dispatch<ReducerAction>;
+}>({
   cart: defaultCart,
   setCart: () => null,
 });
 
-function reducer(state: Cart, action: any) {
+const reducer: CartReducer = (state: Cart, action: ReducerAction) => {
   //console.log("initial state", state);
   switch (action.type) {
     case "ADD_PRODUCT": {
       const sameProduct = state.productTab.find(
-        (product) => product.nom == action.product.nom
+        (product) => product.nom == action.product?.nom
       );
       let newState = {};
       if (sameProduct) {
@@ -43,14 +50,14 @@ function reducer(state: Cart, action: any) {
           ...state,
           numProducts: state.numProducts + 1,
           productTab: [...updatedProducts, sameProduct],
-          totalprice: state.totalprice + action.product.prix,
+          totalprice: state.totalprice + (action.product?.prix || 0),
         };
       } else {
         newState = {
           ...state,
           numProducts: state.numProducts + 1,
           productTab: [...state.productTab, action.product],
-          totalprice: state.totalprice + action.product.prix,
+          totalprice: state.totalprice + (action.product?.prix || 0),
         };
       }
 
@@ -60,7 +67,7 @@ function reducer(state: Cart, action: any) {
     case "REMOVE_PRODUCT": {
       console.log("initial state before remove", state);
       const multipleQtyProduct = state.productTab.find(
-        (product) => product.id == action.product.id
+        (product) => product.id == action.product?.id
       );
       if (multipleQtyProduct && multipleQtyProduct.quantity > 1) {
         multipleQtyProduct.quantity -= 1;
@@ -77,7 +84,7 @@ function reducer(state: Cart, action: any) {
         };
       } else {
         const filteredTab = state.productTab.filter(
-          (product) => product.id !== action.product.id
+          (product) => product.id !== action.product?.id
         );
         console.log("filtered tab : ", filteredTab);
         return {
@@ -85,7 +92,8 @@ function reducer(state: Cart, action: any) {
           productTab: filteredTab,
           numProducts: state.numProducts > 0 ? state.numProducts - 1 : 0,
           totalprice:
-            Math.round((state.totalprice - action.product.prix) * 100) / 100,
+            Math.round((state.totalprice - (action.product?.prix || 0)) * 100) /
+            100,
         };
       }
     }
@@ -104,7 +112,7 @@ function reducer(state: Cart, action: any) {
       };
     }
   }
-}
+};
 
 const CartContextProvider = ({ children }: { children: ReactNode }) => {
   const [cart, setCart] = useReducer<CartReducer>(reducer, defaultCart);

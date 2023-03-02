@@ -51,9 +51,9 @@ function LoginForm() {
   const formulaire: Formulaire = {
     lName: "",
     fName: "",
-    email: "",
+    email: "oussamabechichi@gmail.com",
     confirmEmail: "",
-    password: "",
+    password: "123456",
     confirmPassword: "",
     errors: "",
     ok: "",

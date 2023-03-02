@@ -36,15 +36,15 @@ function Order() {
               purchase_units: [
                 {
                   amount: {
-                    value: cart.totalprice,
+                    value: cart.totalprice.toString(),
                   },
                 },
               ],
             });
           }}
           onApprove={async (data, actions) => {
-            const details = await actions.order.capture();
-            const name = details.payer.name.given_name;
+            const details = await actions.order?.capture();
+            const name = details?.payer.name?.given_name;
             alert("Transaction completed by " + name);
           }}
         />
