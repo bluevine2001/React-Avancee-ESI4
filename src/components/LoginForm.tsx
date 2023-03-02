@@ -1,7 +1,52 @@
-import React, { useReducer, useState } from "react";
+import React, { useContext, useEffect, useReducer, useState } from "react";
+import {
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+  setPersistence,
+  browserSessionPersistence,
+} from "firebase/auth";
+import auth from "../firebase";
+import { UserContext } from "../context/user";
+
+/* setPersistence(auth, browserSessionPersistence).then(() => {
+  return signInWithEmailAndPassword(auth, email, password);
+}); */
 
 function LoginForm() {
-  const formulaire = {
+  const { setUser } = useContext(UserContext);
+  const [mode, setMode] = useState("signin");
+
+  function changeMode(e: React.MouseEvent<HTMLAnchorElement, MouseEvent>) {
+    e.preventDefault();
+    if (mode == "signin") {
+      setMode("signup");
+    } else {
+      setMode("signin");
+    }
+  }
+
+  interface Formulaire {
+    lName: string;
+    fName: string;
+    email: string;
+    confirmEmail: string;
+    password: string;
+    confirmPassword: string;
+    errors: string;
+    ok: string;
+  }
+  /*  interface Action {
+    type: string;
+    lName?: string;
+    fName?: string;
+    email?: string;
+    confirmEmail?: string;
+    password?: string;
+    confirmPassword?: string;
+    errors?: string;
+    ok?: string;
+  } */
+  const formulaire: Formulaire = {
     lName: "",
     fName: "",
     email: "",
@@ -11,7 +56,7 @@ function LoginForm() {
     errors: "",
     ok: "",
   };
-  function reducer(state, action) {
+  function reducer(state: Formulaire, action: any) {
     switch (action.type) {
       case "UPDATE_LNAME": {
         return {
@@ -69,14 +114,20 @@ function LoginForm() {
     }
   }
   const [stateFormulaire, setFormulaire] = useReducer(reducer, formulaire);
+
   const subForm = () => {
-    const isEmpty = Object.values(stateFormulaire)
-      .slice(0, 6)
-      .some((field) => field.length == 0);
-    console.log(isEmpty);
-    //const isEmpty = true;
+    let isEmpty = false;
+    if (mode == "signup") {
+      isEmpty = Object.values(stateFormulaire)
+        .slice(0, 6)
+        .some((field) => field.length == 0);
+    } else {
+      if (stateFormulaire.email == "" && stateFormulaire.password == "") {
+        isEmpty = true;
+      }
+    }
+
     if (isEmpty == true) {
-      console.log("formulaire est vide.");
       setFormulaire({
         type: "UPDATE_ERRORS",
         errors: "Veuillez complétez le formulaire.",
@@ -86,21 +137,57 @@ function LoginForm() {
         type: "UPDATE_ERRORS",
         errors: "",
       });
-      console.log("formulaire pas vide.");
-      if (
-        stateFormulaire.email == stateFormulaire.confirmEmail &&
-        stateFormulaire.password == stateFormulaire.confirmPassword
-      ) {
-        setFormulaire({
-          type: "UPDATE_OK",
-          ok: "Votre inscription a été validé !",
-        });
-        setFormulaire({ type: "UPDATE_ERRORS", errors: "" });
+      //console.log("formulaire pas vide.");
+      if (mode == "signup") {
+        if (
+          stateFormulaire.email == stateFormulaire.confirmEmail &&
+          stateFormulaire.password == stateFormulaire.confirmPassword
+        ) {
+          createUserWithEmailAndPassword(
+            auth,
+            stateFormulaire.email,
+            stateFormulaire.password
+          )
+            .then((userCredential) => {
+              const user = userCredential.user;
+              setUser(user);
+              console.log(user);
+            })
+            .catch((error) => {
+              const errorCode = error.code;
+              const errorMessage = error.message;
+              console.log(errorMessage + errorCode);
+            });
+          setFormulaire({
+            type: "UPDATE_OK",
+            ok: "Votre inscription a été validé !",
+          });
+          setFormulaire({ type: "UPDATE_ERRORS", errors: "" });
+        } else {
+          setFormulaire({
+            type: "UPDATE_ERRORS",
+            errors: "Votre email/mot de passe ne correspondent pas.",
+          });
+        }
       } else {
-        setFormulaire({
-          type: "UPDATE_ERRORS",
-          errors: "Votre email/mot de passe ne correspondent pas.",
-        });
+        // connexion
+        signInWithEmailAndPassword(
+          auth,
+          stateFormulaire.email,
+          stateFormulaire.password
+        )
+          .then((userCredential) => {
+            // Signed in
+            const user = userCredential.user;
+            setUser(user);
+            console.log(user);
+            // ...
+          })
+          .catch((error) => {
+            const errorCode = error.code;
+            const errorMessage = error.message;
+            console.log(errorMessage + errorCode);
+          });
       }
     }
   };
@@ -110,30 +197,35 @@ function LoginForm() {
       {stateFormulaire.errors == "" && stateFormulaire.ok != "" && (
         <p>{stateFormulaire.ok}</p>
       )}
-      <input
-        className="border-solid border-2 border-indigo-600 p-2"
-        type="text"
-        required
-        placeholder="Nom"
-        onChange={(e) => {
-          setFormulaire({
-            type: "UPDATE_LNAME",
-            lName: e.target.value,
-          });
-        }}
-      ></input>
-      <input
-        className="border-solid border-2 border-indigo-600 p-2"
-        type="text"
-        required
-        placeholder="Prenom"
-        onChange={(e) => {
-          setFormulaire({
-            type: "UPDATE_FNAME",
-            fName: e.target.value,
-          });
-        }}
-      ></input>
+      {mode == "signin" ? <h1>Connexion</h1> : <h1>Inscription</h1>}
+      {mode == "signup" && (
+        <input
+          className="border-solid border-2 border-indigo-600 p-2"
+          type="text"
+          required
+          placeholder="Nom"
+          onChange={(e) => {
+            setFormulaire({
+              type: "UPDATE_LNAME",
+              lName: e.target.value,
+            });
+          }}
+        ></input>
+      )}
+      {mode == "signup" && (
+        <input
+          className="border-solid border-2 border-indigo-600 p-2"
+          type="text"
+          required
+          placeholder="Prenom"
+          onChange={(e) => {
+            setFormulaire({
+              type: "UPDATE_FNAME",
+              fName: e.target.value,
+            });
+          }}
+        ></input>
+      )}
       <input
         className="border-solid border-2 border-indigo-600 p-2"
         type="text"
@@ -146,18 +238,20 @@ function LoginForm() {
           });
         }}
       ></input>
-      <input
-        className="border-solid border-2 border-indigo-600 p-2"
-        type="text"
-        required
-        placeholder="Confirmer votre email"
-        onChange={(e) => {
-          setFormulaire({
-            type: "UPDATE_CONFIRM_EMAIL",
-            confirmEmail: e.target.value,
-          });
-        }}
-      ></input>
+      {mode == "signup" && (
+        <input
+          className="border-solid border-2 border-indigo-600 p-2"
+          type="text"
+          required
+          placeholder="Confirmer votre email"
+          onChange={(e) => {
+            setFormulaire({
+              type: "UPDATE_CONFIRM_EMAIL",
+              confirmEmail: e.target.value,
+            });
+          }}
+        ></input>
+      )}
       <input
         className="border-solid border-2 border-indigo-600 p-2"
         type="password"
@@ -170,24 +264,34 @@ function LoginForm() {
           });
         }}
       ></input>
-      <input
-        className="border-solid border-2 border-indigo-600 p-2"
-        type="password"
-        required
-        placeholder="Confirmer votre mot de passe"
-        onChange={(e) => {
-          setFormulaire({
-            type: "UPDATE_CONFIRM_PASSWORD",
-            confirmPassword: e.target.value,
-          });
-        }}
-      ></input>
+      {mode == "signup" && (
+        <input
+          className="border-solid border-2 border-indigo-600 p-2"
+          type="password"
+          required
+          placeholder="Confirmer votre mot de passe"
+          onChange={(e) => {
+            setFormulaire({
+              type: "UPDATE_CONFIRM_PASSWORD",
+              confirmPassword: e.target.value,
+            });
+          }}
+        ></input>
+      )}
       <button
         onClick={subForm}
         className="bg-indigo-600 text-white p-2 border-2 border-solid border-transparent hover:bg-white hover:text-indigo-600 hover:border-indigo-600"
       >
-        s'incrire
+        {mode == "signin" ? "Se connecter" : "S'inscrire"}
       </button>
+      <a
+        href=""
+        onClick={(e) => {
+          changeMode(e);
+        }}
+      >
+        {mode == "signin" ? "S'inscrire" : "Se connecter"}
+      </a>
     </div>
   );
 }
