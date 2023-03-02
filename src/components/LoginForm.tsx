@@ -3,8 +3,6 @@ import { useNavigate, Navigate } from "react-router-dom";
 import {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
-  setPersistence,
-  browserSessionPersistence,
 } from "firebase/auth";
 import auth from "../firebase";
 import { UserContext } from "../context/user";
