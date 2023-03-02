@@ -1,6 +1,15 @@
+import { useContext, useEffect } from "react";
+import { UserContext } from "../context/user";
+import { useNavigate, Navigate } from "react-router-dom";
 import Product from "./shop/Product";
 
 function Shop() {
+  const { user } = useContext(UserContext);
+  console.log(user);
+  //useEffect
+  if (user == undefined) {
+    return <Navigate to="/login" />;
+  }
   return (
     <div>
       <section className="mainSection bg-mainBg  h-[600px]"></section>

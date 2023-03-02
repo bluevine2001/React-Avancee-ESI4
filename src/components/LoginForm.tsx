@@ -1,4 +1,5 @@
 import React, { useContext, useEffect, useReducer, useState } from "react";
+import { useNavigate, Navigate } from "react-router-dom";
 import {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
@@ -15,6 +16,7 @@ import { UserContext } from "../context/user";
 function LoginForm() {
   const { setUser } = useContext(UserContext);
   const [mode, setMode] = useState("signin");
+  const navigate = useNavigate();
 
   function changeMode(e: React.MouseEvent<HTMLAnchorElement, MouseEvent>) {
     e.preventDefault();
@@ -181,6 +183,7 @@ function LoginForm() {
             const user = userCredential.user;
             setUser(user);
             console.log(user);
+            navigate("/");
             // ...
           })
           .catch((error) => {

@@ -1,6 +1,7 @@
 import CartItem from "./CartItem";
 import { CartContext } from "../../context/cart";
 import { useContext } from "react";
+import { Link, useNavigate } from "react-router-dom";
 function Cart(props: { hidden: boolean }) {
   type Product = {
     id: number;
@@ -57,11 +58,11 @@ function Cart(props: { hidden: boolean }) {
         <div className="totalPrice p-1">Total : {cart.totalprice} €</div>
         {cart.numProducts > 0 ? (
           <div className="paybtn p-1 rounded-lg bg-green-500 text-white">
-            Acheter
+            <Link to="/order">Acheter</Link>
           </div>
         ) : (
           <div className="paybtn p-1 rounded-lg bg-gray-500 text-white">
-            Acheter
+            <Link to="/order">Acheter</Link>
           </div>
         )}
       </div>
