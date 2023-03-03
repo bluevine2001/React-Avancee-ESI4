@@ -13,7 +13,10 @@ function Cart(props: { hidden: boolean }) {
   const { cart, setCart } = useContext(CartContext);
   function emptyCart(e: React.MouseEvent<HTMLAnchorElement, MouseEvent>) {
     e.preventDefault();
-    setCart({ type: "EMPTY_CART" });
+    setCart({
+      type: "EMPTY_CART",
+      product: { id: 0, nom: "", prix: 0, imgUrl: "", quantity: 0 },
+    });
   }
   let hidden = "hidden";
   if (props.hidden == false) {

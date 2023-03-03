@@ -31,7 +31,13 @@ function CartItem(props: any) {
               onClick={() => {
                 setCart({
                   type: "REMOVE_PRODUCT",
-                  product: { id: props.id, prix: props.prix },
+                  product: {
+                    id: props.id,
+                    nom: props.nom,
+                    imgUrl: props.imgUrl,
+                    quantity: props.quantity,
+                    prix: props.prix,
+                  },
                 });
               }}
             >
