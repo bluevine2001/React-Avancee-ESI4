@@ -7,6 +7,7 @@ type CartItem = {
   imgUrl: string;
   quantity: number;
 };
+
 type Cart = {
   numProducts: number;
   productTab: CartItem[];
@@ -15,7 +16,8 @@ type Cart = {
 
 type ReducerAction = {
   type: string;
-  product?: { id?: number; nom?: string; prix?: number; quantity?: number };
+  product: CartItem;
+  // product?: { id?: number; nom?: string; prix?: number; quantity?: number };
 };
 type CartReducer = React.Reducer<Cart, ReducerAction>;
 //type CartReducer = (state: Cart, action: any) => Cart;
@@ -40,21 +42,23 @@ const reducer: CartReducer = (state: Cart, action: ReducerAction) => {
       const sameProduct = state.productTab.find(
         (product) => product.nom == action.product?.nom
       );
-      let newState = {};
+      let newState: Cart = {
+        numProducts: 0,
+        productTab: [],
+        totalprice: 0,
+      };
       if (sameProduct) {
         sameProduct.quantity += 1;
         const updatedProducts = state.productTab.filter(
           (product) => product.id !== sameProduct.id
         );
         newState = {
-          ...state,
           numProducts: state.numProducts + 1,
           productTab: [...updatedProducts, sameProduct],
           totalprice: state.totalprice + (action.product?.prix || 0),
         };
       } else {
         newState = {
-          ...state,
           numProducts: state.numProducts + 1,
           productTab: [...state.productTab, action.product],
           totalprice: state.totalprice + (action.product?.prix || 0),

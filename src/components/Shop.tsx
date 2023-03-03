@@ -1,7 +1,15 @@
 import { useContext, useEffect } from "react";
 import { UserContext } from "../context/user";
-import { useNavigate, Navigate } from "react-router-dom";
+import { Navigate } from "react-router-dom";
 import Product from "./shop/Product";
+/* import { collection, getDocs } from "firebase/firestore";
+import { getFirestore } from "firebase/firestore";
+const db = getFirestore()
+const querySnapshot = await getDocs(collection(db, "products"));
+querySnapshot.forEach((doc) => {
+  // doc.data() is never undefined for query doc snapshots
+  console.log(doc.id, " => ", doc.data());
+}); */
 
 function Shop() {
   const { user } = useContext(UserContext);
