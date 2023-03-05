@@ -8,7 +8,7 @@ function Product(props: any) {
     setCart({ type: "ADD_PRODUCT", product });
   };
   return (
-    <div className="flex font-sans w-1/3 shadow-lg rounded-md m-2 border-2">
+    <div className="flex font-sans w-1/3 shadow-lg rounded-md m-2 border-2 min-[500]">
       <div className="flex-none w-48 relative">
         <img
           src={props.imgurl}
